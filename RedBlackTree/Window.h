@@ -2,6 +2,8 @@
 #include <Windows.h>
 #include <optional>
 
+#include "Graphic.h"
+
 class Window
 {
 private:
@@ -29,13 +31,14 @@ public:
 	Window(const Window&) = delete;
 	Window& operator= (const Window&) = delete;
 	static std::optional<int> ProcessMessages();
-
+	void DoFrame();
 
 private:
 	static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 	static INT_PTR CALLBACK About(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam);
 
 public:
+	Graphic gfx;
 
 private:
 	HWND	hWnd;

@@ -81,6 +81,8 @@ Window::Window(const WCHAR* app_title, UINT width, UINT height)
         return;
     }
 
+    gfx.Init(hWnd);
+
     ShowWindow(hWnd, SW_SHOWDEFAULT);
 }
 
@@ -105,6 +107,11 @@ std::optional<int> Window::ProcessMessages()
     }
 
     return {};
+}
+
+void Window::DoFrame()
+{
+    gfx.draw();
 }
 
 LRESULT Window::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)

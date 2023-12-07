@@ -20,6 +20,6 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
             return *ecode;
         }
 
-        // 코드를 입력..
+        window.DoFrame();
     }
 }

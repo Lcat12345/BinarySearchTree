@@ -1,5 +1,9 @@
 #include "Window.h"
+#include "imgui.h"
+#include "imgui_impl_win32.h"
+
 #include "Resource.h"
+#include <tchar.h>
 
 #define WS_MYSTYLE (WS_OVERLAPPED     | \
                              WS_CAPTION        | \
@@ -47,6 +51,7 @@ Window::WindowClass::~WindowClass()
 }
 
 Window::Window(const WCHAR* app_title, UINT width, UINT height)
+    : width(width), height(height)
 {
     RECT wr;
 
@@ -81,6 +86,10 @@ Window::Window(const WCHAR* app_title, UINT width, UINT height)
         return;
     }
 
+    // ImGui 초기화
+    ImGui::CreateContext();
+    ImGui_ImplWin32_Init(hWnd);
+
     gfx.Init(hWnd);
 
     ShowWindow(hWnd, SW_SHOWDEFAULT);
@@ -88,7 +97,13 @@ Window::Window(const WCHAR* app_title, UINT width, UINT height)
 
 Window::~Window()
 {
+    // ImGui 해제
+    ImGui_ImplWin32_Shutdown();
+    ImGui::DestroyContext();
+    
+
     DestroyWindow(hWnd);
+
 }
 
 std::optional<int> Window::ProcessMessages()
@@ -111,11 +126,20 @@ std::optional<int> Window::ProcessMessages()
 
 void Window::DoFrame()
 {
-    gfx.draw();
+    // ImGui 업데이트 및 렌더링
+    ImGui_ImplWin32_NewFrame();
+    ImGui::NewFrame();
+
+    ImGui::Begin("Hello, ImGui!");
+    ImGui::Text("This is a simple ImGui example.");
+    ImGui::End();
 }
 
 LRESULT Window::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
+    if (ImGui_ImplWin32_WndProcHandler(hWnd, message, wParam, lParam))
+        return true;
+
     switch (message)
     {
     case WM_COMMAND:
@@ -128,6 +152,7 @@ LRESULT Window::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             DialogBox(WindowClass::GetInstance(), MAKEINTRESOURCE(IDD_ABOUTBOX), hWnd, About);
             break;
         case IDM_EXIT:
+            KillTimer(hWnd, 1);
             DestroyWindow(hWnd);
             break;
         default:
@@ -135,11 +160,36 @@ LRESULT Window::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         }
     }
     break;
+    case WM_CREATE:
+        SetTimer(hWnd, 1, 1000, NULL);  // 1초마다 타이머 발생
+        break;
+    case WM_TIMER:
+        if (wParam == 1) {
+            // 타이머가 발생할 때마다 화면을 갱신
+            InvalidateRect(hWnd, NULL, TRUE);
+        }
+        break;
     case WM_PAINT:
     {
         PAINTSTRUCT ps;
         HDC hdc = BeginPaint(hWnd, &ps);
-        // TODO: 여기에 hdc를 사용하는 그리기 코드를 추가합니다...
+
+        // 시간을 얻어와서 그리기
+        SYSTEMTIME st;
+        GetLocalTime(&st);
+        TCHAR timeStr[9]; // "HH:MM:SS" 형태의 문자열
+        _stprintf_s(timeStr, _T("%02d:%02d:%02d"), st.wHour, st.wMinute, st.wSecond);
+
+        // 폰트 설정
+        HFONT hFont = CreateFont(50, 0, 0, 0, FW_BOLD, FALSE, FALSE, FALSE, DEFAULT_CHARSET, OUT_OUTLINE_PRECIS,
+            CLIP_DEFAULT_PRECIS, CLEARTYPE_QUALITY, DEFAULT_PITCH | FF_DONTCARE, _T("D2Coding"));
+        HFONT oldFont = (HFONT)SelectObject(hdc, hFont);
+
+        TextOut(hdc, 120, 70, timeStr, _tcslen(timeStr));
+
+        SelectObject(hdc, oldFont);
+        DeleteObject(oldFont);
+
         EndPaint(hWnd, &ps);
     }
     break;
@@ -169,6 +219,18 @@ INT_PTR CALLBACK Window::About(HWND hDlg, UINT message, WPARAM wParam, LPARAM lP
         break;
     }
     return (INT_PTR)FALSE;
+}
+
+void Window::clear()
+{
+    HDC hdc = GetDC(hWnd);
+
+    HBRUSH hBrush = (HBRUSH)GetStockObject(WHITE_BRUSH);
+    HBRUSH hDefaultBrush = (HBRUSH)SelectObject(hdc, hBrush);
+
+    Rectangle(hdc, -1, -1, width, height);
+
+    DeleteObject(hBrush);
 }
 
 

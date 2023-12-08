@@ -21,5 +21,16 @@ void Graphic::Init(HWND _hwnd)
 
 void Graphic::draw()
 {
-	Rectangle(hdc, 10, 10, 100, 100);
+
+
+
+	// 화면 클리어
+
+	// present
+
+}
+
+void Graphic::clear()
+{
+
 }

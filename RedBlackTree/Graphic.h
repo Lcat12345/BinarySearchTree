@@ -11,7 +11,11 @@ public:
 	void draw();
 
 private:
+	void clear();
+
+private:
 	HDC hdc;
+
 	HWND hwnd;
 };
 

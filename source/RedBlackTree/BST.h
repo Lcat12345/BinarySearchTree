@@ -1,6 +1,6 @@
 #pragma once
 #include <memory>
-
+#include <utility>
 
 using std::unique_ptr;
 
@@ -9,6 +9,28 @@ struct myPair
 {
 	T1 first;
 	T2 second;
+
+	myPair<T1, T2>& operator= (const myPair<T1, T2>& other)
+	{
+		if (this == &other)
+			return *this;
+
+		first = other.first;
+		second = other.second;
+
+		return *this;
+	}
+
+	myPair<T1, T2>& operator= (const myPair<T1, T2>&& other)
+	{
+		if (this == &other)
+			return *this;
+
+		first = std::move(other.first);
+		second = std::move(other.second);
+
+		return *this;
+	}
 };
 
 //template <typename T1, typename T2>
@@ -330,6 +352,7 @@ inline bool BST<Key, Value>::erase(const Key& _key)
 			if (nullptr == nextNode->LeftChild && nullptr == nextNode->RightChild)
 			{
 				iter.curNode->pair = nextNode->pair;
+				// iter.curNode->pair = std::move(nextNode->pair);
 
 				if (isLeft(nextNode))
 					nextNode->parent->LeftChild = nullptr;
@@ -342,7 +365,8 @@ inline bool BST<Key, Value>::erase(const Key& _key)
 			// 후속자가 자식이 있는 경우
 			else
 			{
-				iter.curNode->pair = nextNode->pair;
+				// iter.curNode->pair = nextNode->pair;
+				iter.curNode->pair = std::move(nextNode->pair);
 
 				// 데이터 복사 후 후속자 노드를 삭제해야 한다. 
 				// 후속자가 자식이 있어서 자식과 후속자의 부모를 연결해줘야 한다.
@@ -353,10 +377,8 @@ inline bool BST<Key, Value>::erase(const Key& _key)
 				if (isLeft(nextNode))
 					nextNode->parent->LeftChild = nextNode->LeftChild;
 				else
-					nextNode->parent->RightChild = nextNode->RightChild;
-					
+					nextNode->parent->RightChild = nextNode->RightChild;		
 				
-
 				delete nextNode;
 			}
 		}

@@ -21,7 +21,7 @@ struct myPair
 		return *this;
 	}
 
-	myPair<T1, T2>& operator= (const myPair<T1, T2>&& other)
+	myPair<T1, T2>& operator= (myPair<T1, T2>&& other) noexcept
 	{
 		if (this == &other)
 			return *this;

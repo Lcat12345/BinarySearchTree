@@ -2,6 +2,11 @@
 #include <memory>
 #include <utility>
 
+enum class Color {
+	RED,
+	BLACK,
+};
+
 using std::unique_ptr;
 
 template <typename T1, typename T2>
@@ -52,6 +57,7 @@ template <typename K, typename V>
 struct Node
 {
 	myPair<K, V> pair;
+	Color color;
 
 	Node* parent;
 	Node* LeftChild;
@@ -167,9 +173,22 @@ inline void BST<Key, Value>::insert(const myPair<Key, Value>& _pair)
 	if (nullptr == pNode)
 	{
 		RootNode = newNode;
+
+		// case 1 : Root node is Black
+		RootNode->color = Color::BLACK;
 	}
 	else
 	{
+		// case 2 : Parent is Black. fine
+		if (Color::BLACK == pNode->parent->color)
+		{
+			pNode->color = Color::RED;
+		}
+		else
+		{
+
+		}
+
 		while (true)
 		{
 			if (pNode->pair.first > newNode->pair.first)

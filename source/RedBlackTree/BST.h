@@ -84,6 +84,14 @@ public:
 	void insert(const myPair<Key, Value>& _pair);
 	void post_order_release(Node<Key, Value>* node);
 	Node<Key, Value>* GetInOrderSuccessor(Node<Key, Value>* _Node);
+	Node<Key, Value>* GetGrandParents(Node<Key, Value>* _Node);
+	Node<Key, Value>* GetUncle(Node<Key, Value>* _Node);
+	void insert_case_1(Node<Key, Value>* _Node);
+	void insert_case_2(Node<Key, Value>* _Node);
+	void insert_case_3(Node<Key, Value>* _Node);
+	void insert_case_4(Node<Key, Value>* _Node);
+	void insert_case_5(Node<Key, Value>* _Node);
+
 
 	bool isLeft(Node<Key, Value>* curNode)
 	{
@@ -168,27 +176,14 @@ inline void BST<Key, Value>::insert(const myPair<Key, Value>& _pair)
 	newNode->LeftChild = nullptr;
 	newNode->RightChild = nullptr;
 
-	Node<Key, Value>* pNode = RootNode;
+	Node<Key, Value>* pNode = RootNode;	 
 
 	if (nullptr == pNode)
 	{
 		RootNode = newNode;
-
-		// case 1 : Root node is Black
-		RootNode->color = Color::BLACK;
 	}
 	else
 	{
-		// case 2 : Parent is Black. fine
-		if (Color::BLACK == pNode->parent->color)
-		{
-			pNode->color = Color::RED;
-		}
-		else
-		{
-
-		}
-
 		while (true)
 		{
 			if (pNode->pair.first > newNode->pair.first)
@@ -217,6 +212,11 @@ inline void BST<Key, Value>::insert(const myPair<Key, Value>& _pair)
 			}
 		}	
 	}
+
+	// Set Color
+	pNode->color = Color::RED;
+
+	insert_case_1(pNode);
 
 	nodeCount++;
 }
@@ -280,6 +280,84 @@ inline Node<Key, Value>* BST<Key, Value>::GetInOrderSuccessor(Node<Key, Value>* 
 	}
 
 	return Successor;
+}
+
+template<typename Key, typename Value>
+inline Node<Key, Value>* BST<Key, Value>::GetGrandParents(Node<Key, Value>* _Node)
+{
+	if ((nullptr != _Node) && (nullptr != n->parent))
+		return n->parent->parent;
+	else
+		return nullptr;
+}
+
+template<typename Key, typename Value>
+inline Node<Key, Value>* BST<Key, Value>::GetUncle(Node<Key, Value>* _Node)
+{
+	Node<Key, Value>* grand_parent = GetGrandParents(_Node);
+
+	if (nullptr != grand_parent)
+		return nullptr;
+
+	if (grand_parent->LeftChild == _Node->parent)
+		return grand_parent->RightChild;
+	else
+		return grand_parent->LeftChild;
+}
+
+template<typename Key, typename Value>
+inline void BST<Key, Value>::insert_case_1(Node<Key, Value>* _Node)
+{
+	if( nullptr == _Node->parent)
+	{
+		_Node->color = Color::BLACK;
+	}
+	else
+	{
+		insert_case_2(_Node);
+	}
+}
+
+template<typename Key, typename Value>
+inline void BST<Key, Value>::insert_case_2(Node<Key, Value>* _Node)
+{
+	if (Color::BLACK == _Node->parent->color)
+	{
+		return;
+	}
+	else
+	{
+		insert_case_3(_Node);
+	}
+}
+
+template<typename Key, typename Value>
+inline void BST<Key, Value>::insert_case_3(Node<Key, Value>* _Node)
+{
+	// 부모의 색깔이 빨간색인 경우 ( insert case 2 의 반대 조건으로 왔으므로 ) -> 연속으로 빨강이 올수 없음
+	// 삼촌의 색깔이 빨강인지 확인
+
+	Node<Key, Value>* uncle = GetUncle(_Node);
+	Node<Key, Value>* grand = GetGrandParents(_Node);
+
+	if (nullptr != uncle && Color::RED == uncle->color)
+	{
+
+	}
+	
+
+}
+
+template<typename Key, typename Value>
+inline void BST<Key, Value>::insert_case_4(Node<Key, Value>* _Node)
+{
+
+}
+
+template<typename Key, typename Value>
+inline void BST<Key, Value>::insert_case_5(Node<Key, Value>* _Node)
+{
+
 }
 
 template<typename Key, typename Value>
